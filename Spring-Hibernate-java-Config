@@ -1,0 +1,58 @@
+@Configuration
+@EnableWebMvc
+@EnableTransactionManagement
+@ComponentScan("com.spring.hibernate")
+public class MyWebConfig {
+
+	
+	@Bean
+	public ViewResolver viewResolver() {
+		return new InternalResourceViewResolver("/WEB-INF/view/", ".jsp");
+	}
+	
+	@Bean
+	public ComboPooledDataSource source(){
+		ComboPooledDataSource dataSource=new ComboPooledDataSource();
+		
+		try {
+			dataSource.setDriverClass("com.mysql.jdbc.Driver");
+			dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/web_customer_tracker");
+			dataSource.setUser("root");
+			dataSource.setPassword("root");
+			return dataSource;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	@Bean
+	public LocalSessionFactoryBean sessionFactory() {
+		
+		LocalSessionFactoryBean sessionFactory=new LocalSessionFactoryBean();
+		sessionFactory.setDataSource(source());
+		sessionFactory.setPackagesToScan(new String[] {
+				"com.spring.hibernate"
+		});
+		sessionFactory.setHibernateProperties(hibernateProperties());
+		return sessionFactory;
+	}
+	
+	 public Properties hibernateProperties() {
+	        Properties properties = new Properties();
+	        properties.put("hibernate.dialect","org.hibernate.dialect.MySQLDialect");
+	        properties.put("hibernate.show_sql",true);
+	        return properties;
+	    }
+	 
+	 @Bean
+	 public HibernateTransactionManager getTransactionManager() {
+		 
+		 HibernateTransactionManager myTransactionManager=new HibernateTransactionManager();
+		 myTransactionManager.setSessionFactory(sessionFactory().getObject());
+		 return myTransactionManager;
+		 
+	 }
+}
